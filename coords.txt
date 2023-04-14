@@ -1,0 +1,79 @@
+Make sure to increase maxiter with zoom and resolution in order to get good images, but most of the time a couple of thousand iterations will suffice for smaller resolutions.
+The scalematch values here are tried out in order to get nice looking images, but feel free to experiment!
+
+Standard config: (edited other HP guy)
+	filename = res
+	zoom = 0.4
+	focusx = -0.5
+	focusy = 0.0
+	scalematch = 50
+
+Standard demo: (other HP guy)
+	filename = "demo" + res
+	zoom = 1.0 / 0.15
+	focusx = 0.415625
+	focusy = 0.35625
+	scalematch = 50
+
+Nice minibrot: (me) HIGHLY RECOMMENDED
+	filename = "im0_minibrot" + res
+	zoom = 2000000000
+	focusx = -0.84001630111
+	focusy = 0.2243033877985
+	scalematch = 250
+
+Undescribable very cool: (internet guy) HIGHLY RECOMMENDED
+	filename = "im1_minibrots" + res
+	zoom = 10000
+	focusx = 0.254
+	focusy = -0.00044
+	scalematch = 25
+
+Nice image: (internet guy)
+	filename = "im2" + res
+	zoom = 52
+	focusx = -0.722
+	focusy = 0.246
+	scalematch = 100
+
+Cacti-like cool: (internet guy)
+	filename = "im3" + res
+	zoom = 2255
+	focusx = -0.37398906
+	focusy = 0.659717669
+	scalematch = 50
+
+Cool minibrot: (internet guy) HIGHLY RECOMMENDED
+	filename = "im4_minibrot" + res
+	zoom = 33333
+	focusx = -0.745428
+	focusy = 0.113009
+	scalematch = 100
+
+Minibrot: (edited internet guy)
+	filename = "im5_minibrot" + res
+	zoom = 50
+	focusx = 0.443541797
+	focusy = -0.3740957064
+	scalematch = 50
+
+Minibrot: (internet guy) RECOMMENDED
+	filename = "im6_minibrot" + res
+	zoom = 1500000
+	focusx = -0.0049143
+	focusy = -0.8050736
+	scalematch = 255
+
+Julia set (?): (me) RECOMMENDED
+	filename = "im7_julia" + res
+	zoom = 26843545.6
+	focusx = -0.580392067324
+	focusy = 0.652865977026
+	scalematch = 75
+
+Spiral: (me) RECOMMENDED
+	filename = "im8_spiral" + res
+	zoom = 102.4
+	focusx = -0.792663574218
+	focusy = 0.16082763672
+	scalematch = 50

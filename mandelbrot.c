@@ -136,7 +136,7 @@ int main () {
 	double focusx = -0.5;
 	double focusy = 0.0;
 	int scalematch = 50;
-	char savename[] = "../images/bmp/64K_dark.bmp";
+	char savename[] = "images/bmp/64K_dark.bmp";
 	bool smooth = true;
 	bool gray = false;
 	bool dark = true;

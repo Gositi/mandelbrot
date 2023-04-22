@@ -130,13 +130,13 @@ void mandelbrot (double aspectRatio, int width, int maxiter, double zoom, double
 int main () {
 	//Settings
 	double aspectRatio = 16.0 / 9.0;
-	int width = 1920 * 32;
-	int maxiter = 1000000;
+	int width = 1920;
+	int maxiter = 2000;
 	double zoom = 0.4;
 	double focusx = -0.5;
 	double focusy = 0.0;
 	int scalematch = 50;
-	char savename[] = "images/bmp/64K_dark.bmp";
+	char savename[] = "images/bmp/2K_dark.bmp";
 	bool smooth = true;
 	bool gray = false;
 	bool dark = true;

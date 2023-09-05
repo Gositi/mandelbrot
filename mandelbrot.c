@@ -4,6 +4,50 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+//Load config from file
+int loadConfig (double *aspectRatio, int *width, int *maxiter, double *zoom, double *focusx, double *focusy, int *scalematch, bool *smooth, bool *gray, bool *dark) {
+	int i;
+	char d;
+	FILE *fp = fopen ("config", "r");
+
+	//aspectRatio
+	i = fscanf (fp, "%lf\n", aspectRatio);
+	if (i != 1) {fclose (fp); return 1;}
+	//width
+	i = fscanf (fp, "%d\n", width);
+	if (i != 1) {fclose (fp); return 1;}
+	//maxiter
+	i = fscanf (fp, "%d\n", maxiter);
+	if (i != 1) {fclose (fp); return 1;}
+	//zoom
+	i = fscanf (fp, "%lf\n", zoom);
+	if (i != 1) {fclose (fp); return 1;}
+	//focusx
+	i = fscanf (fp, "%lf\n", focusx);
+	if (i != 1) {fclose (fp); return 1;}
+	//focusy
+	i = fscanf (fp, "%lf\n", focusy);
+	if (i != 1) {fclose (fp); return 1;}
+	//scalematch
+	i = fscanf (fp, "%d\n", scalematch);
+	if (i != 1) {fclose (fp); return 1;}
+	//smooth
+	i = fscanf (fp, "%c\n", &d);
+	if (i != 1) {fclose (fp); return 1;}
+	if (d == '1') {*smooth = true;} else {*smooth = false;}
+	//gray
+	i = fscanf (fp, "%c\n", &d);
+	if (i != 1) {fclose (fp); return 1;}
+	if (d == '1') {*gray = true;} else {*gray = false;}
+	//dark
+	i = fscanf (fp, "%c\n", &d);
+	if (i != 1) {fclose (fp); return 1;}
+	if (d == '1') {*dark = true;} else {*dark = false;}
+
+	fclose (fp);
+	return 0;
+}
+
 void color (double i, int maxi, double scale, int rgb [], bool gray, bool dark) {
 	double c = asin (1) * 4;
 	double v = i * c / (maxi * scale);
@@ -78,7 +122,7 @@ double iterate (double xc, double yc, int maxiter, bool smooth) {
 	return out;
 }
 
-void mandelbrot (double aspectRatio, int width, int maxiter, double zoom, double focusx, double focusy, int scalematch, char savename [], bool smooth, bool gray, bool dark) {
+void mandelbrot (double aspectRatio, int width, int maxiter, double zoom, double focusx, double focusy, int scalematch, bool smooth, bool gray, bool dark) {
 	//Declare variables
 	bmp_img img;
 	int height;
@@ -123,26 +167,25 @@ void mandelbrot (double aspectRatio, int width, int maxiter, double zoom, double
 	}
 
 	//Save image
-	bmp_img_write (&img, savename);
+	bmp_img_write (&img, "mandel.bmp");
 	bmp_img_free (&img);
 }
 
 int main () {
 	//Settings
-	double aspectRatio = 16.0 / 9.0;
-	int width = 1920;
-	int maxiter = 2000;
-	double zoom = 0.4;
-	double focusx = -0.5;
-	double focusy = 0.0;
-	int scalematch = 50;
-	char savename[] = "images/bmp/2K_dark.bmp";
-	bool smooth = true;
-	bool gray = false;
-	bool dark = true;
+	double aspectRatio, zoom, focusx, focusy;
+	int width, maxiter, scalematch;
+	bool smooth, gray, dark;
+
+	//Load config from file
+	int i = loadConfig (&aspectRatio, &width, &maxiter, &zoom, &focusx, &focusy, &scalematch, &smooth, &gray, &dark);
 
 	//Render the fractal
-	mandelbrot (aspectRatio, width, maxiter, zoom, focusx, focusy, scalematch, savename, smooth, gray, dark);
+	if (i == 0) {
+		mandelbrot (aspectRatio, width, maxiter, zoom, focusx, focusy, scalematch, smooth, gray, dark);
+	} else {
+		printf ("Error using config file\n");
+	}
 
 	//Exit with code 0
 	return 0;

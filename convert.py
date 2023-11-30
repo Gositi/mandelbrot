@@ -7,7 +7,7 @@ def main ():
     print ("Opening image")
     im = Image.open ("mandel.bmp")
     print ("Saving image")
-    im.save ("./images/" + sys.argv [1] + ".png")
+    im.save ("./images/" + sys.argv [1])
     print ("Finished.")
 
 if __name__ == "__main__":

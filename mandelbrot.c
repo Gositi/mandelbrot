@@ -4,48 +4,63 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+//Struct for rendering config data
+typedef struct _cfg {
+	double aspectRatio;
+	int width;
+	int maxiter;
+	double zoom;
+	double focusx;
+	double focusy;
+	int scalematch;
+	bool smooth;
+	bool gray;
+	bool dark;
+} cfg;
+
 //Load config from file
-int loadConfig (double *aspectRatio, int *width, int *maxiter, double *zoom, double *focusx, double *focusy, int *scalematch, bool *smooth, bool *gray, bool *dark) {
+cfg loadConfig () {
+	cfg conf;
 	int i;
 	char d;
 	FILE *fp = fopen ("config", "r");
 
 	//aspectRatio
-	i = fscanf (fp, "%lf\n", aspectRatio);
-	if (i != 1) {fclose (fp); return 1;}
+	i = fscanf (fp, "%lf\n", &conf.aspectRatio);
+	if (i != 1) {fclose (fp); exit (1);}
 	//width
-	i = fscanf (fp, "%d\n", width);
-	if (i != 1) {fclose (fp); return 1;}
+	i = fscanf (fp, "%d\n", &conf.width);
+	if (i != 1) {fclose (fp); exit (1);}
 	//maxiter
-	i = fscanf (fp, "%d\n", maxiter);
-	if (i != 1) {fclose (fp); return 1;}
+	i = fscanf (fp, "%d\n", &conf.maxiter);
+	if (i != 1) {fclose (fp); exit (1);}
 	//zoom
-	i = fscanf (fp, "%lf\n", zoom);
-	if (i != 1) {fclose (fp); return 1;}
+	i = fscanf (fp, "%lf\n", &conf.zoom);
+	if (i != 1) {fclose (fp); exit (1);}
 	//focusx
-	i = fscanf (fp, "%lf\n", focusx);
-	if (i != 1) {fclose (fp); return 1;}
+	i = fscanf (fp, "%lf\n", &conf.focusx);
+	if (i != 1) {fclose (fp); exit (1);}
 	//focusy
-	i = fscanf (fp, "%lf\n", focusy);
-	if (i != 1) {fclose (fp); return 1;}
+	i = fscanf (fp, "%lf\n", &conf.focusy);
+	if (i != 1) {fclose (fp); exit (1);}
 	//scalematch
-	i = fscanf (fp, "%d\n", scalematch);
-	if (i != 1) {fclose (fp); return 1;}
+	i = fscanf (fp, "%d\n", &conf.scalematch);
+	if (i != 1) {fclose (fp); exit (1);}
 	//smooth
 	i = fscanf (fp, "%c\n", &d);
-	if (i != 1) {fclose (fp); return 1;}
-	if (d == '1') {*smooth = true;} else {*smooth = false;}
+	if (i != 1) {fclose (fp); exit (1);}
+	if (d == '1') {conf.smooth = true;} else {conf.smooth = false;}
 	//gray
 	i = fscanf (fp, "%c\n", &d);
-	if (i != 1) {fclose (fp); return 1;}
-	if (d == '1') {*gray = true;} else {*gray = false;}
+	if (i != 1) {fclose (fp); exit (1);}
+	if (d == '1') {conf.gray = true;} else {conf.gray = false;}
 	//dark
 	i = fscanf (fp, "%c\n", &d);
-	if (i != 1) {fclose (fp); return 1;}
-	if (d == '1') {*dark = true;} else {*dark = false;}
+	if (i != 1) {fclose (fp); exit (1);}
+	if (d == '1') {conf.dark = true;} else {conf.dark = false;}
 
 	fclose (fp);
-	return 0;
+	return conf;
 }
 
 void color (double i, int maxi, double scale, int rgb [], bool gray, bool dark) {
@@ -122,25 +137,26 @@ double iterate (double xc, double yc, int maxiter, bool smooth) {
 	return out;
 }
 
-void mandelbrot (double aspectRatio, int width, int maxiter, double zoom, double focusx, double focusy, int scalematch, bool smooth, bool gray, bool dark) {
+void mandelbrot (cfg conf) {
 	//Declare variables
 	bmp_img img;
-	int height;
+	int height, width;
 	double yrange, xrange, minx, maxx, miny, maxy, colorscale, x, y, i;
 	int rgb [] = {0, 0, 0};
 
 	//Set control variables
-	height = (int) (((double) width) / aspectRatio);
+	height = (int) (((double) conf.width) / conf.aspectRatio);
+	width = conf.width;	//Used so much it's worth it
 
-	yrange = 1 / zoom;
-	xrange = yrange * aspectRatio;
+	yrange = 1 / conf.zoom;
+	xrange = yrange * conf.aspectRatio;
 
-	minx = focusx - xrange / 2;
-	maxx = focusx + xrange / 2;
-	miny = focusy + yrange / 2;
-	maxy = focusy - yrange / 2;
+	minx = conf.focusx - xrange / 2;
+	maxx = conf.focusx + xrange / 2;
+	miny = conf.focusy + yrange / 2;
+	maxy = conf.focusy - yrange / 2;
 
-	colorscale = ((double) scalematch) / ((double) maxiter);
+	colorscale = ((double) conf.scalematch) / ((double) conf.maxiter);
 
 	//Create image
 	bmp_img_init_df (&img, width, height);
@@ -151,10 +167,10 @@ void mandelbrot (double aspectRatio, int width, int maxiter, double zoom, double
 		for (int ys = 0; ys < height; ys++) {
 			y = (ys * (maxy - miny) / height) + miny;
 
-			i = iterate (x, y, maxiter, smooth);
+			i = iterate (x, y, conf.maxiter, conf.smooth);
 
-			if (i < maxiter + 1) {
-				color (i, maxiter, colorscale, rgb, gray, dark);
+			if (i < conf.maxiter + 1) {
+				color (i, conf.maxiter, colorscale, rgb, conf.gray, conf.dark);
 			} else {
 				rgb [0] = 0;
 				rgb [1] = 0;
@@ -172,20 +188,11 @@ void mandelbrot (double aspectRatio, int width, int maxiter, double zoom, double
 }
 
 int main () {
-	//Settings
-	double aspectRatio, zoom, focusx, focusy;
-	int width, maxiter, scalematch;
-	bool smooth, gray, dark;
-
 	//Load config from file
-	int i = loadConfig (&aspectRatio, &width, &maxiter, &zoom, &focusx, &focusy, &scalematch, &smooth, &gray, &dark);
+	cfg conf = loadConfig ();
 
 	//Render the fractal
-	if (i == 0) {
-		mandelbrot (aspectRatio, width, maxiter, zoom, focusx, focusy, scalematch, smooth, gray, dark);
-	} else {
-		printf ("Error using config file\n");
-	}
+	mandelbrot (conf);
 
 	//Exit with code 0
 	return 0;

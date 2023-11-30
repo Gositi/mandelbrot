@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#define NUM_THREADS 1
+#define NUM_THREADS 3
 
 //Struct for rendering config data
 typedef struct _config {
@@ -206,8 +206,7 @@ void *mandelWorker (void* args) {
 
 			bmp_pixel_init (&(img->img_pixels[ys][xs]), rgb [0], rgb [1], rgb [2]);
 		}
-		//if (xs % 100 == 0) printf ("%d\n", xs);
-		printf ("%d\t%d\t%lf\n", offset, xs, i);
+		if ((xs / module) % 100 == 0) printf ("%d\t%d\n", offset, xs);
 	}
 
 	return NULL;

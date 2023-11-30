@@ -3,9 +3,12 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <pthread.h>
+
+#define NUM_THREADS 1
 
 //Struct for rendering config data
-typedef struct _cfg {
+typedef struct _config {
 	double aspectRatio;
 	int width;
 	int maxiter;
@@ -18,6 +21,30 @@ typedef struct _cfg {
 	bool dark;
 } cfg;
 
+//Struct for actual setup data, for passing to threads
+typedef struct _setup {
+	int width;
+	int height;
+	double minx;
+	double maxx;
+	double miny;
+	double maxy;
+	int maxiter;
+	double colorscale;
+	bool smooth;
+	bool gray;
+	bool dark;
+	int module; //Number of threads
+	bmp_img* img;
+} stp;
+
+//Struct for carrying data over to thread
+//This is not a nice solution, but it at least works
+typedef struct _data {
+	stp* setup;
+	int offset; //Offset to ensure threads aren't interfering
+} data;
+	
 //Load config from file
 cfg loadConfig () {
 	cfg conf;
@@ -137,16 +164,63 @@ double iterate (double xc, double yc, int maxiter, bool smooth) {
 	return out;
 }
 
+void *mandelWorker (void* args) {
+	//Load setup
+	data* carrier = args;
+	stp* setup = carrier->setup;
+	int offset = carrier->offset;
+	
+	//Unloading data from setup
+	int width = setup->width;
+	int height = setup->height;
+	double minx = setup->minx;
+	double maxx = setup->maxx;
+	double miny = setup->miny;
+	double maxy = setup->maxy;
+	int maxiter = setup->maxiter;
+	double colorscale = setup->colorscale;
+	bool smooth = setup->smooth;
+	bool gray = setup->gray;
+	bool dark = setup->dark;
+	int module = setup->module;
+	bmp_img* img = setup->img;
+	
+	//Start rendering
+	int rgb [] = {0, 0, 0};
+	double x, y;
+	double i;
+	for (int xs = offset; xs < width; xs+=module) {
+		x = (xs * (maxx - minx) / width) + minx; 
+		for (int ys = 0; ys < height; ys++) {
+			y = (ys * (maxy - miny) / height) + miny;
+
+			i = iterate (x, y, maxiter, smooth);
+
+			if (i < maxiter + 1) {
+				color (i, maxiter, colorscale, rgb, gray, dark);
+			} else {
+				rgb [0] = 0;
+				rgb [1] = 0;
+				rgb [2] = 0;
+			}
+
+			bmp_pixel_init (&(img->img_pixels[ys][xs]), rgb [0], rgb [1], rgb [2]);
+		}
+		//if (xs % 100 == 0) printf ("%d\n", xs);
+		printf ("%d\t%d\t%lf\n", offset, xs, i);
+	}
+
+	return NULL;
+}
+
 void mandelbrot (cfg conf) {
 	//Declare variables
 	bmp_img img;
-	int height, width;
-	double yrange, xrange, minx, maxx, miny, maxy, colorscale, x, y, i;
-	int rgb [] = {0, 0, 0};
+	int height;
+	double yrange, xrange, minx, maxx, miny, maxy, colorscale;
 
 	//Set control variables
 	height = (int) (((double) conf.width) / conf.aspectRatio);
-	width = conf.width;	//Used so much it's worth it
 
 	yrange = 1 / conf.zoom;
 	xrange = yrange * conf.aspectRatio;
@@ -159,27 +233,37 @@ void mandelbrot (cfg conf) {
 	colorscale = ((double) conf.scalematch) / ((double) conf.maxiter);
 
 	//Create image
-	bmp_img_init_df (&img, width, height);
+	bmp_img_init_df (&img, conf.width, height);
 
-	//Start rendering
-	for (int xs = 0; xs < width; xs++) {
-		x = (xs * (maxx - minx) / width) + minx; 
-		for (int ys = 0; ys < height; ys++) {
-			y = (ys * (maxy - miny) / height) + miny;
+	//Create setup struct for data transfer
+	stp setup;
+	setup.width = conf.width;
+	setup.height = height;
+	setup.minx = minx;
+	setup.maxx = maxx;
+	setup.miny = miny;
+	setup.maxy = maxy;
+	setup.maxiter = conf.maxiter;
+	setup.colorscale = colorscale;
+	setup.smooth = conf.smooth;
+	setup.gray = conf.gray;
+	setup.dark = conf.dark;
+	setup.module = NUM_THREADS;
+	setup.img = &img;
 
-			i = iterate (x, y, conf.maxiter, conf.smooth);
+	//Create threads
+	pthread_t threads [NUM_THREADS];
+	data* carriers [NUM_THREADS];
+	for (int i = 0; i < NUM_THREADS; i++) {
+		carriers [i] = malloc (sizeof (data));
+		(carriers [i])->setup = &setup;
+		(carriers [i])->offset = i;
+		pthread_create (&(threads [i]), NULL, mandelWorker, carriers [i]);
+	}
 
-			if (i < conf.maxiter + 1) {
-				color (i, conf.maxiter, colorscale, rgb, conf.gray, conf.dark);
-			} else {
-				rgb [0] = 0;
-				rgb [1] = 0;
-				rgb [2] = 0;
-			}
-
-			bmp_pixel_init (&img.img_pixels[ys][xs], rgb [0], rgb [1], rgb [2]);
-		}
-		if (xs % 100 == 0) printf ("%d\n", xs);
+	//Join threads
+	for (int i = 0; i < NUM_THREADS; i++) {
+		pthread_join (threads [i], NULL);
 	}
 
 	//Save image

@@ -6,7 +6,7 @@ def main ():
     saveConfig (getConfig ())
 
 def getConfig ():
-    names = ["aspect ratio", "image width", "max iterations", "zoom", "focusx", "focusy", "scalematch", "smooth colors", "gray colors", "dark colors"]
+    names = ["aspect ratio", "image width", "max iterations", "zoom", "focusx", "focusy", "scalematch", "threadcount", "smooth colors", "gray colors", "dark colors"]
     if not os.path.exists("config"):
         open("config", 'w').close()
     with open ("config", "r") as file:

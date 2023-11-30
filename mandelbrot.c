@@ -5,8 +5,6 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#define NUM_THREADS 3
-
 //Struct for rendering config data
 typedef struct _config {
 	double aspectRatio;
@@ -19,6 +17,7 @@ typedef struct _config {
 	bool smooth;
 	bool gray;
 	bool dark;
+	int threadcount;
 } cfg;
 
 //Struct for actual setup data, for passing to threads
@@ -72,6 +71,9 @@ cfg loadConfig () {
 	if (i != 1) {fclose (fp); exit (1);}
 	//scalematch
 	i = fscanf (fp, "%d\n", &conf.scalematch);
+	if (i != 1) {fclose (fp); exit (1);}
+	//threadcount
+	i = fscanf (fp, "%d\n", &conf.threadcount);
 	if (i != 1) {fclose (fp); exit (1);}
 	//smooth
 	i = fscanf (fp, "%c\n", &d);
@@ -235,6 +237,7 @@ void mandelbrot (cfg conf) {
 	bmp_img_init_df (&img, conf.width, height);
 
 	//Create setup struct for data transfer
+	int threadcount = conf.threadcount;
 	stp setup;
 	setup.width = conf.width;
 	setup.height = height;
@@ -247,13 +250,13 @@ void mandelbrot (cfg conf) {
 	setup.smooth = conf.smooth;
 	setup.gray = conf.gray;
 	setup.dark = conf.dark;
-	setup.module = NUM_THREADS;
+	setup.module = threadcount;
 	setup.img = &img;
 
 	//Create threads
-	pthread_t threads [NUM_THREADS];
-	data* carriers [NUM_THREADS];
-	for (int i = 0; i < NUM_THREADS; i++) {
+	pthread_t threads [threadcount];
+	data* carriers [threadcount];
+	for (int i = 0; i < threadcount; i++) {
 		carriers [i] = malloc (sizeof (data));
 		(carriers [i])->setup = &setup;
 		(carriers [i])->offset = i;
@@ -261,8 +264,13 @@ void mandelbrot (cfg conf) {
 	}
 
 	//Join threads
-	for (int i = 0; i < NUM_THREADS; i++) {
+	for (int i = 0; i < threadcount; i++) {
 		pthread_join (threads [i], NULL);
+	}
+
+	//Free data
+	for (int i = 0; i < threadcount; i++) {
+		free (carriers [i]);
 	}
 
 	//Save image

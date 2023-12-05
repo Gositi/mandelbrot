@@ -22,10 +22,10 @@ Limitations:
 
 ## Usage
 ### Initial setup
-The compiled code is for 64-bit Linux, it should work right out of the box on most systems and is tested on later versions of Ubuntu.
-I'd recommend you compile it anyways, it's only a few hundred lines of code so it's really quick and easy.
-You compile with `make mandelbrot`.
-Running the program is then done by running the produced executable, `mandelbrot`.
+The compiled code is for 64-bit Windows, it should work right out of the box on most systems and is tested on later versions of Ubuntu (using Wine).
+I'm not sure about how well it would actually compile on Windows, since it uses POSIX threads, so I'd reccommend you use the provided executable.
+The makefile is also made for Linux systems, as usual you use it with `make mandelbrot`.
+Running the program is then done by running the produced executable, `mandelbrot.exe`.
 
 ### Config
 Out of the box a simple 2k (1920x1080) config file is ready.
@@ -45,7 +45,7 @@ Thus it doesn't tell you much about the input it expects and it doesn't evaluate
 Some day I will get around to making it better, likely moving it to it's own project (as it already is in use in another program).
 
 ### Running the program
-Running the program is, as mentioned above, not harder than typing `./mandelbrot` in your terminal of choice.
+Running the program is, as mentioned above, not harder than running the `mandelbrot.exe` executable, or on Linux typing `wine mandelbrot.exe` into your terminal of choice.
 Each thread will print its progress every 100 columns, which should give you an idea of how long time is left.
 
 The program will produce a file called `mandel.bmp`, because that was easiest.
@@ -59,3 +59,4 @@ The converter script uses about twice as much memory as the size of the raw `man
 - Add checking of return codes for errors
 - Improve the `coords.txt` file
 - Add some way of quickly loading preset configs (files in a directory?)
+- Make sure the program runs well on actual Windows machines

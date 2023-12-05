@@ -1,3 +1,5 @@
+#include <windows.h>
+#include <winbase.h>
 #include "libbmp.h"
 #include <stdio.h>
 #include <math.h>

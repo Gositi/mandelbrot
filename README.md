@@ -2,6 +2,8 @@
 A pretty fast mandelbrot renderer written in C.
 Now threaded.
 
+Windows cross-compiled version, tested with Wine.
+
 Credits for the libbmp library goes to <https://github.com/marc-q/libbmp>, with small changes to resolve compiler warnings.
 
 ## Features and limitations

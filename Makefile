@@ -6,7 +6,7 @@ BINDIR = $(DESTDIR)/usr/bin
 NAME = mandelbrot
 
 mandelbrot: $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJECTS) $(LIBS) -lm
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJECTS) $(LIBS) -lm -lpthread
 
 clean:
 	rm $(NAME)

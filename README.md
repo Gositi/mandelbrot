@@ -19,6 +19,8 @@ Limitations:
 - The slowest thread decides the final runspeed, if a thread "gets stuck" you will have to wait for it
 
 ## Usage
+For the Windows cross-compiled version, refer to the `windows` branch of the repo.
+
 ### Initial setup
 The compiled code is for 64-bit Linux, it should work right out of the box on most systems and is tested on later versions of Ubuntu.
 I'd recommend you compile it anyways, it's only a few hundred lines of code so it's really quick and easy.
